@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aethelgard | Career Mentor & Technical Assessor</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Custom scrollbars and transitions */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.3); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.5); }
+    .badge-glow { box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+    .tab-active { border-bottom: 2px solid #6366f1; color: #6366f1; font-weight: 600; }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased font-sans min-h-screen">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-[var(--border)] bg-[var(--card)] sticky top-0 z-50 shadow-sm backdrop-blur-md bg-opacity-90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+          Ω
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg tracking-tight">MentorOS</h1>
+            <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">Mastery Engine</span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)]">Adaptive Technical Assessment & Progression</p>
+        </div>
+      </div>
+
+      <!-- User Session Controls -->
+      <div id="navUserBar" class="flex items-center gap-3">
+        <!-- Injected via JS based on Auth state -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Auth View (When Logged Out) -->
+    <div id="authSection" class="max-w-md mx-auto my-8">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-xl">
+        <!-- Auth Tabs -->
+        <div class="flex border-b border-[var(--border)] mb-6">
+          <button id="tabLogin" onclick="switchAuthTab('login')" class="flex-1 pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600">
+            Sign In
+          </button>
+          <button id="tabSignup" onclick="switchAuthTab('signup')" class="flex-1 pb-3 text-sm font-semibold border-b-2 border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+            Create Profile
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Username / Handle</label>
+            <input type="text" id="loginUsername" required placeholder="e.g. dev_alex" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Passcode / PIN</label>
+            <input type="password" id="loginPin" required placeholder="4 to 6 digit PIN" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+          <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-500/20 transition flex items-center justify-center gap-2">
+            <span>Access Assessment Portal</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+          <div class="text-center pt-2">
+            <button type="button" onclick="loadDemoAccount()" class="text-xs text-indigo-500 hover:underline">
+              ⚡ Quick Load Demo Cadet Profile
+            </button>
+          </div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" onsubmit="handleSignup(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Full Name / Handle</label>
+            <input type="text" id="signupName" required placeholder="Alex Mercer" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Username</label>
+            <input type="text" id="signupUsername" required placeholder="alex_dev" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Create PIN / Passcode</label>
+            <input type="password" id="signupPin" required placeholder="Create 4-6 digit passcode" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Primary Career Target</label>
+            <select id="signupRole" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--content)] text-[var(--foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <option value="Senior Full-Stack Architect">Senior Full-Stack Architect (TypeScript, React, Node, Microservices)</option>
+              <option value="Machine Learning / AI Engineer">Machine Learning / AI Engineer (PyTorch, LLMs, RAG, Distributed Systems)</option>
+              <option value="Cloud Platform & DevOps Lead">Cloud Platform & DevOps Lead (Kubernetes, AWS/GCP, Terraform, CI/CD)</option>
+              <option value="Backend Systems & Performance Engineer">Backend Systems & Performance Engineer (Go/Rust, Low-Latency, Distributed DBs)</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-500/20 transition">
+            Initialize Trainee Record
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Authenticated Dashboard & Mentorship Modules -->
+    <div id="appDashboard" class="space-y-6 hidden">
+
+      <!-- Candidate Status Banner -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <h2 id="traineeNameDisplay" class="font-bold text-xl">Cadet Alex</h2>
+              <span id="roleBadgeDisplay" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                Senior Full-Stack Architect
+              </span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] flex items-center gap-2">
+              <span>Status: <strong class="text-emerald-500">Active Progression</strong></span>
+              <span>•</span>
+              <span id="evaluatedBaselineDisplay">Baseline: Pending Intake Diagnostics</span>
+            </p>
+          </div>
+
+          <!-- Progression Milestone Pills -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="px-3 py-1.5 rounded-xl bg-[var(--content)] border border-[var(--border)] text-xs flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Phase 1: <strong>Fundamentals</strong></span>
+            </div>
+            <div class="px-3 py-1.5 rounded-xl bg-[var(--content)] border border-[var(--border)] text-xs flex items-center gap-2 opacity-60">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span>Phase 2: <strong>Architecture</strong></span>
+            </div>
+            <div class="px-3 py-1.5 rounded-xl bg-[var(--content)] border border-[var(--border)] text-xs flex items-center gap-2 opacity-60">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              <span>Phase 3: <strong>Applied Mastery</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex border-b border-[var(--border)] overflow-x-auto space-x-6 text-sm font-medium">
+        <button onclick="switchModule('intake')" id="tab-intake" class="tab-btn pb-3 whitespace-nowrap tab-active flex items-center gap-2">
+          <span>1. Intake & Baseline Test</span>
+          <span id="diagnosticStatusDot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+        </button>
+        <button onclick="switchModule('roadmap')" id="tab-roadmap" class="tab-btn pb-3 whitespace-nowrap text-[var(--muted-foreground)] hover:text-[var(--foreground)] flex items-center gap-2">
+          <span>2. Tailored Phased Roadmap</span>
+        </button>
+        <button onclick="switchModule('checkpoints')" id="tab-checkpoints" class="tab-btn pb-3 whitespace-nowrap text-[var(--muted-foreground)] hover:text-[var(--foreground)] flex items-center gap-2">
+          <span>3. Daily Progress & Checkpoints</span>
+        </button>
+        <button onclick="switchModule('gatekeeper')" id="tab-gatekeeper" class="tab-btn pb-3 whitespace-nowrap text-[var(--muted-foreground)] hover:text-[var(--foreground)] flex items-center gap-2">
+          <span>4. Gatekeeper Exam (≥80% Rule)</span>
+          <span id="gateLockStatus" class="px-1.5 py-0.2 rounded text-[10px] bg-red-500/10 text-red-400 border border-red-500/20">LOCKED</span>
+        </button>
+      </div>
+
+      <!-- ================= MODULE 1: INTAKE & BASELINE ASSESSMENT ================= -->
+      <section id="module-intake" class="module-pane space-y-6">
+        <!-- Intake Question Box -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-5">
+          <div class="border-b border-[var(--border)] pb-4">
+            <h3 class="text-lg font-bold">Phase 1: Candidate Intake & Baseline Diagnostic Test</h3>
+            <p class="text-sm text-[var(--muted-foreground)]">Your mentor assesses your true technical baseline via 5 targeted, scenario-based dilemmas.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-[var(--muted-foreground)] mb-1">Target Career Role</label>
+              <input type="text" id="intakeGoalInput" value="Senior Full-Stack Architect" 
+                class="w-full px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--content)] text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-[var(--muted-foreground)] mb-1">Self-Assessed Skill Level</label>
+              <select id="intakeLevelInput" class="w-full px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--content)] text-sm">
+                <option value="Beginner">Beginner (Foundational concepts & early coding)</option>
+                <option value="Intermediate" selected>Intermediate (Production coding, seeking high-scale depth)</option>
+                <option value="Advanced">Advanced (Experienced lead, refining distributed systems & edge-cases)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button onclick="startDiagnosticTest()" id="btnStartDiagnostic" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition shadow-sm">
+              Generate 5 Scenario Questions
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Diagnostic Questions Container -->
+        <div id="diagnosticQuestionsContainer" class="hidden space-y-4">
+          <div class="bg-indigo-950/20 border border-indigo-800/30 rounded-2xl p-4 flex items-center justify-between">
+            <div class="text-sm">
+              <span class="font-bold text-indigo-400">Diagnostic In Progress:</span> 
+              <span class="text-[var(--muted-foreground)]">Answer each dilemma honestly. Do not guess blindly.</span>
+            </div>
+            <div class="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300">
+              5 Scenario Questions
+            </div>
+          </div>
+
+          <!-- Dynamic Questions Render Area -->
+          <div id="questionsList" class="space-y-4"></div>
+
+          <div class="flex justify-end pt-3">
+            <button onclick="submitDiagnosticTest()" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md transition flex items-center gap-2">
+              <span>Submit for Mentor Evaluation</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Assessment Results & Gap Diagnosis -->
+        <div id="diagnosticResultsBox" class="hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+            <div>
+              <span class="text-xs font-semibold uppercase text-emerald-500 tracking-wider">Evaluation Completed</span>
+              <h3 class="text-xl font-bold">Mentor Baseline Diagnosis & Gap Report</h3>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-extrabold text-indigo-400" id="diagnosticScore">80%</div>
+              <div class="text-xs text-[var(--muted-foreground)]">Diagnostic Competency Score</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 rounded-xl bg-[var(--content)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)] uppercase font-semibold">True Knowledge Baseline</div>
+              <div id="trueBaselineText" class="text-base font-bold mt-1 text-[var(--foreground)]">Solid Intermediate</div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">Strong asynchronous patterns; needs hardening in event-driven consistency.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-[var(--content)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)] uppercase font-semibold">Primary Knowledge Gaps</div>
+              <div id="gapIdentifiedText" class="text-sm font-semibold mt-1 text-amber-400">Database Locking & Race Condition Mitigation</div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">Struggled with phantom reads and optimistic concurrency controls.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-[var(--content)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)] uppercase font-semibold">Roadmap Calibration</div>
+              <div class="text-sm font-semibold mt-1 text-emerald-400">Phase 1 Tailored</div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">Foundations prioritized before advancing to distributed event brokers.</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-indigo-900/10 border border-indigo-500/20 text-sm">
+            <h4 class="font-bold text-indigo-400 mb-1">Mentor's Prescriptive Verdict:</h4>
+            <p id="mentorPrescription" class="text-[var(--muted-foreground)] leading-relaxed">
+              "You demonstrated reliable intuition for async event loops and client-side state reconciliation. However, your response to concurrent transaction isolation exposed vulnerability in edge-case data integrity. Your customized Phase 1 roadmap will rigorously focus on transactional isolation, memory profiling, and idempotency guarantees."
+            </p>
+          </div>
+
+          <div class="flex justify-end">
+            <button onclick="switchModule('roadmap')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition">
+              Proceed to Phase 1 Tailored Roadmap →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= MODULE 2: TAILORED PHASED ROADMAP ================= -->
+      <section id="module-roadmap" class="module-pane space-y-6 hidden">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+          <div class="border-b border-[var(--border)] pb-4 flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold">Chronological Mastery Roadmap</h3>
+              <p class="text-sm text-[var(--muted-foreground)]">Customized based on your diagnostic baseline and Senior Architect goal.</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              Strict Gatekeeper Enforced
+            </span>
+          </div>
+
+          <!-- Phase 1 (Active) -->
+          <div class="border border-indigo-500/40 rounded-2xl p-5 bg-indigo-500/5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">1</span>
+                <div>
+                  <h4 class="font-bold text-base text-[var(--foreground)]">Phase 1: Core Fundamentals & System Reliability</h4>
+                  <p class="text-xs text-indigo-400 font-medium">STATUS: CURRENT FOCUS (Unlocked)</p>
+                </div>
+              </div>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300">Target: 7 Days</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+                <h5 class="text-xs font-bold uppercase text-[var(--muted-foreground)] mb-2">Core Concepts to Master</h5>
+                <ul class="text-xs space-y-1.5 text-[var(--foreground)]">
+                  <li>• Event Loop internals & microtask starvation</li>
+                  <li>• ACID guarantees & Postgres transaction isolation levels</li>
+                  <li>• Idempotent API design & Distributed UUIDv7</li>
+                  <li>• Memory leak profiling & Heap dump analysis</li>
+                </ul>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+                <h5 class="text-xs font-bold uppercase text-[var(--muted-foreground)] mb-2">Specific Learning Objectives</h5>
+                <ul class="text-xs space-y-1.5 text-[var(--foreground)]">
+                  <li>• Implement pessimistic & optimistic row locks</li>
+                  <li>• Prevent race conditions under 1,000 req/sec load</li>
+                  <li>• Formulate zero-downtime migration scripts</li>
+                  <li>• Author strict TypeScript contract schemas</li>
+                </ul>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+                <h5 class="text-xs font-bold uppercase text-[var(--muted-foreground)] mb-2">Daily Study & Hands-On Labs</h5>
+                <ul class="text-xs space-y-1.5 text-[var(--foreground)]">
+                  <li>• 90 mins daily: 45m deep reading + 45m live code</li>
+                  <li>• Lab 1: Double-spend payment prevention bench</li>
+                  <li>• Lab 2: Node.js V8 memory leak debugger</li>
+                  <li>• End-of-phase: Gatekeeper Exam (≥ 80% pass score)</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button onclick="switchModule('checkpoints')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition">
+                Open Today's Daily Checkpoint →
+              </button>
+            </div>
+          </div>
+
+          <!-- Phase 2 (Locked) -->
+          <div class="border border-[var(--border)] rounded-2xl p-5 bg-[var(--card)] opacity-60 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-[var(--content)] border border-[var(--border)] text-[var(--muted-foreground)] flex items-center justify-center font-bold text-sm">2</span>
+                <div>
+                  <h4 class="font-bold text-base text-[var(--foreground)]">Phase 2: Distributed Architecture, Caching & Event Streams</h4>
+                  <p class="text-xs text-[var(--muted-foreground)]">STATUS: LOCKED (Requires Phase 1 Gatekeeper Exam ≥ 80%)</p>
+                </div>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-red-500/10 text-red-400 font-medium">Locked 🔒</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Focuses on Redis cache invalidation topologies, Kafka partition rebalancing, distributed consensus (Raft/Paxos), and event-sourcing with CQRS.
+            </p>
+          </div>
+
+          <!-- Phase 3 (Locked) -->
+          <div class="border border-[var(--border)] rounded-2xl p-5 bg-[var(--card)] opacity-60 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-[var(--content)] border border-[var(--border)] text-[var(--muted-foreground)] flex items-center justify-center font-bold text-sm">3</span>
+                <div>
+                  <h4 class="font-bold text-base text-[var(--foreground)]">Phase 3: High-Scale Applied Production & Staff Leadership</h4>
+                  <p class="text-xs text-[var(--muted-foreground)]">STATUS: LOCKED</p>
+                </div>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-red-500/10 text-red-400 font-medium">Locked 🔒</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Real-world chaos engineering, multi-region active-active database failover, observability instrumentation (OpenTelemetry), and staff-level architectural RFCs.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= MODULE 3: DAILY PROGRESS & CHECKPOINTS ================= -->
+      <section id="module-checkpoints" class="module-pane space-y-6 hidden">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+          <div class="border-b border-[var(--border)] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400">DAY 3 OF 7</span>
+                <h3 class="text-lg font-bold">Daily Guidance: Concurrency & Transactional Isolation</h3>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Bite-sized targets and conceptual code verification for today.</p>
+            </div>
+            <div class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 self-start sm:self-auto">
+              Streak: 🔥 3 Days Continuous
+            </div>
+          </div>
+
+          <!-- Concrete Daily Tasks -->
+          <div class="space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Assigned Tasks & Learning Resources</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-4 rounded-xl bg-[var(--content)] border border-[var(--border)] space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-indigo-400">1. Reading & Theory</span>
+                  <span class="text-[10px] text-[var(--muted-foreground)]">30 mins</span>
+                </div>
+                <p class="text-xs text-[var(--foreground)] font-medium">Read Postgres docs on "Repeatable Read vs Serializable Isolation Level Anomalies".</p>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Focus on Write Skew anomaly and how Serializable Snapshot Isolation (SSI) avoids locks.</div>
+              </div>
+              <div class="p-4 rounded-xl bg-[var(--content)] border border-[var(--border)] space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-emerald-400">2. Practical Code Exercise</span>
+                  <span class="text-[10px] text-[var(--muted-foreground)]">45 mins</span>
+                </div>
+                <p class="text-xs text-[var(--foreground)] font-medium">Simulate concurrent seat reservation in SQL with <code class="text-indigo-400">SELECT ... FOR UPDATE</code>.</p>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Benchmark 50 parallel asynchronous clients reserving the same resource concurrently.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Daily Verification Question -->
+          <div class="p-5 rounded-2xl bg-indigo-950/20 border border-indigo-500/30 space-y-4">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-bold text-indigo-300">Daily Knowledge Verification Checkpoint</h4>
+              <span class="text-xs text-[var(--muted-foreground)] font-mono">Verification ID: #V-304</span>
+            </div>
+            
+            <p class="text-xs text-[var(--foreground)] leading-relaxed">
+              <strong>Code Scenario:</strong> Two concurrent banking transactions execute at the exact same millisecond:
+            </p>
+
+            <pre class="bg-black/40 border border-white/10 rounded-xl p-3 text-[11px] font-mono text-emerald-300 overflow-x-auto">
+-- Transaction A:
+SELECT balance FROM accounts WHERE id = 42; -- returns 100
+UPDATE accounts SET balance = balance - 80 WHERE id = 42;
+
+-- Transaction B (simultaneously):
+SELECT balance FROM accounts WHERE id = 42; -- returns 100
+UPDATE accounts SET balance = balance - 80 WHERE id = 42;
+COMMIT;</pre>
+
+            <p class="text-xs text-[var(--foreground)]">
+              Under default PostgreSQL <strong>Read Committed</strong> isolation without explicit locks or constraints, what anomaly occurs, and what is the optimal production fix?
+            </p>
+
+            <div class="space-y-2 text-xs">
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-[var(--border)] hover:bg-[var(--content)] cursor-pointer">
+                <input type="radio" name="dailyCheck" value="opt1" class="mt-0.5 text-indigo-600">
+                <span><strong>Lost Update:</strong> Both transactions succeed, balance becomes 20 (lost deduction of 80). Fix with <code class="text-indigo-400">UPDATE accounts SET balance = balance - 80 WHERE id = 42 AND balance >= 80;</code> or atomic conditional updates.</span>
+              </label>
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-[var(--border)] hover:bg-[var(--content)] cursor-pointer">
+                <input type="radio" name="dailyCheck" value="opt2" class="mt-0.5 text-indigo-600">
+                <span><strong>Dirty Read:</strong> Transaction B crashes immediately because PostgreSQL locks the entire accounts table on any read.</span>
+              </label>
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-[var(--border)] hover:bg-[var(--content)] cursor-pointer">
+                <input type="radio" name="dailyCheck" value="opt3" class="mt-0.5 text-indigo-600">
+                <span><strong>Phantom Read:</strong> New rows are automatically inserted to balance the deficit.</span>
+              </label>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <button onclick="verifyDailyCheckpoint()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
+                Verify Answer
+              </button>
+              <span id="dailyVerificationFeedback" class="text-xs font-medium"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= MODULE 4: GATEKEEPER EXAM & PROGRESSION ================= -->
+      <section id="module-gatekeeper" class="module-pane space-y-6 hidden">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+          <div class="border-b border-[var(--border)] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">STRICT GATEWAY</span>
+                <h3 class="text-lg font-bold">Phase 1 Gatekeeper Examination</h3>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5">
+                Mastery Rule: You must score <strong>≥ 80% (at least 4/5 correct)</strong> to unlock Phase 2. Zero tolerance for core data-loss misconceptions.
+              </p>
+            </div>
+            <div id="gatekeeperBadge" class="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold self-start sm:self-auto">
+              Phase 2 Locked
+            </div>
+          </div>
+
+          <!-- Exam Questions Container -->
+          <div id="examQuestionsList" class="space-y-4">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="flex justify-end pt-3">
+            <button onclick="submitGatekeeperExam()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md transition flex items-center gap-2">
+              <span>Grade Gatekeeper Exam</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </button>
+          </div>
+
+          <!-- Pass/Fail Result Feedback Panel -->
+          <div id="examResultPanel" class="hidden p-5 rounded-2xl border space-y-4 transition">
+            <!-- Dynamic Pass or Remedial Breakdown -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Application Logic -->
+  <script>
+    // State management
+    const state = {
+      user: null,
+      activeModule: 'intake',
+      diagnosticScore: null,
+      phase2Unlocked: false,
+      gatekeeperScore: null,
+      diagnosticAnswers: {},
+      examAnswers: {}
+    };
+
+    // Diagnostic Questions Database
+    const diagnosticBank = [
+      {
+        id: 'q1',
+        title: 'Scenario 1: Node.js Microtask Starvation',
+        text: 'A high-throughput API server becomes unresponsive to incoming HTTP requests, though CPU utilization is only 25%. Profiling shows an un-awaited recursive `process.nextTick()` loop executing without interruption.',
+        options: [
+          { text: 'A) The nextTick queue is processed after I/O callbacks, so the server is blocked waiting on socket read events.', correct: false },
+          { text: 'B) process.nextTick resolves immediately after the current operation finishes, starving the event loop from ever advancing to the timers or I/O poll phase.', correct: true },
+          { text: 'C) The garbage collector paused all execution due to immediate heap exhaustion caused by nextTick closures.', correct: false },
+          { text: 'D) Operating system file descriptors were exhausted by duplicate socket handshakes.', correct: false }
+        ]
+      },
+      {
+        id: 'q2',
+        title: 'Scenario 2: High-Volume E-Commerce Inventory Race',
+        text: 'During a flash sale, 5,000 customers click "Checkout" simultaneously for the last 5 items. The inventory table shows negative stock (-14). Which architectural strategy guarantees correct stock without distributed table locks?',
+        options: [
+          { text: 'A) Wrap the check-and-decrement in an application-level mutex in Node.js memory across instances.', correct: false },
+          { text: 'B) Use an atomic conditional SQL decrement: `UPDATE items SET stock = stock - 1 WHERE id = ? AND stock > 0;` checking affected rows.', correct: true },
+          { text: 'C) Switch the database isolation level to READ UNCOMMITTED for faster concurrency.', correct: false },
+          { text: 'D) Rely on Redis `GET` then `SET` operations without Lua scripts.', correct: false }
+        ]
+      },
+      {
+        id: 'q3',
+        title: 'Scenario 3: Idempotent Payment API Design',
+        text: 'A mobile client initiates a payment. Due to cellular jitter, the client drops connection before receiving the 200 OK and retries 3 times. What is the production-grade approach to avoid duplicate billing?',
+        options: [
+          { text: 'A) Check if the user ID billed someone within the last 5 seconds and reject it.', correct: false },
+          { text: 'B) Require an Idempotency-Key header stored with an atomic state machine (PENDING, PROCESSED) in a transactional datastore.', correct: true },
+          { text: 'C) Increase HTTP connection timeout to 60 seconds on the client side.', correct: false },
+          { text: 'D) Run payments asynchronously in a detached fire-and-forget worker thread.', correct: false }
+        ]
+      },
+      {
+        id: 'q4',
+        title: 'Scenario 4: Postgres Write Skew in Booking System',
+        text: 'Under REPEATABLE READ isolation in PostgreSQL, two doctors attempt to take time off at the same time. The business rule says at least one doctor must remain on call. Both transactions query the on-call count (returns 2) and update their own status to inactive.',
+        options: [
+          { text: 'A) Write skew anomaly: REPEATABLE READ does not detect conflicting predicates on different rows; use SERIALIZABLE isolation or SELECT FOR UPDATE.', correct: true },
+          { text: 'B) Both transactions will automatically abort with a Deadlock Error in Postgres.', correct: false },
+          { text: 'C) Postgres automatically upgrades the transaction to a table lock.', correct: false },
+          { text: 'D) Dirty reads will cause one transaction to see the other uncommitted update.', correct: false }
+        ]
+      },
+      {
+        id: 'q5',
+        title: 'Scenario 5: V8 Memory Leak Detection',
+        text: 'Your backend memory footprint increases monotonically by 15MB/hour until the container gets OOMKilled by Kubernetes. A heap dump shows millions of retained closures holding references to an event emitter.',
+        options: [
+          { text: 'A) Increase Node.js max-old-space-size to 16GB so the crash is avoided.', correct: false },
+          { text: 'B) Listener callbacks registered with `.on()` are never deregistered via `.removeListener()`, preventing their parent lexical scopes from garbage collection.', correct: true },
+          { text: 'C) The event loop queue cannot release strings larger than 256KB.', correct: false },
+          { text: 'D) TCP keep-alive sockets cannot release closures in Linux kernels.', correct: false }
+        ]
+      }
+    ];
+
+    // Gatekeeper Exam Questions Database
+    const gatekeeperBank = [
+      {
+        id: 'gk1',
+        title: 'Gatekeeper Challenge 1: Distributed Idempotency Edge-Case',
+        text: 'An API gateway receives two identical requests with Idempotency-Key: `uuid-990` within 2 milliseconds of each other. Transaction 1 is actively calling Stripe, but has not completed. What must Transaction 2 do?',
+        options: [
+          { text: 'A) Execute in parallel and let Stripe figure out the duplication.', correct: false },
+          { text: 'B) Detect the in-flight lock/PENDING state, wait/poll or return HTTP 409 Conflict / 425 Too Early until Transaction 1 completes, then return the cached response.', correct: true },
+          { text: 'C) Immediately return HTTP 200 OK with null body.', correct: false },
+          { text: 'D) Delete the key from cache and reject both requests.', correct: false }
+        ]
+      },
+      {
+        id: 'gk2',
+        title: 'Gatekeeper Challenge 2: PostgreSQL Indexing & Query Planner',
+        text: 'A query `SELECT * FROM orders WHERE status = \'pending\' AND created_at > NOW() - INTERVAL \'1 day\'` suddenly performs a sequential scan of 10 million rows despite a B-tree index on `(created_at, status)`. Why?',
+        options: [
+          { text: 'A) B-Tree indexes cannot be used when the query leading column in the index does not match the leftmost query filter or low selectivity leads the planner to favor seq scan.', correct: true },
+          { text: 'B) Postgres does not support composite indexes with date intervals.', correct: false },
+          { text: 'C) The table has too many WAL logs enabled.', correct: false },
+          { text: 'D) Read committed transactions disable all composite indexes.', correct: false }
+        ]
+      },
+      {
+        id: 'gk3',
+        title: 'Gatekeeper Challenge 3: TCP Backpressure & Stream Buffering',
+        text: 'A Node.js microservice reads a 10GB file from S3 and pipes it to a slow downstream webhook. Memory climbs to 4GB and crashes. Why did `readable.on(\'data\', chunk => slowClient.write(chunk))` fail?',
+        options: [
+          { text: 'A) Node.js Buffers are limited to 2GB per process.', correct: false },
+          { text: 'B) Uncontrolled flow without respecting `.write()` return value and the `drain` event disregards backpressure, accumulating chunks in RAM.', correct: true },
+          { text: 'C) S3 aborts streams that last longer than 60 seconds.', correct: false },
+          { text: 'D) Linux kernel TCP window size cannot exceed 64KB.', correct: false }
+        ]
+      },
+      {
+        id: 'gk4',
+        title: 'Gatekeeper Challenge 4: Cache Penetration vs Breakdown vs Stampede',
+        text: 'A critical product cache entry expires at midnight. Exactly at 00:00:01, 10,000 requests hit the key simultaneously, bypassing cache and crashing the primary database. What specific anomaly is this, and how is it prevented?',
+        options: [
+          { text: 'A) Cache Stampede (Dog-piling); mitigated by Mutex locking on cache miss (Singleflight pattern) or probabilistic early expiration (XFetch).', correct: true },
+          { text: 'B) Cache Penetration; mitigated only by increasing Postgres connection pool.', correct: false },
+          { text: 'C) Cache Avalanche; mitigated by clearing the database indexes.', correct: false },
+          { text: 'D) Dirty Page Spill; mitigated by disabling Redis persistence.', correct: false }
+        ]
+      },
+      {
+        id: 'gk5',
+        title: 'Gatekeeper Challenge 5: Event Sourcing & Snapshot Reconstruction',
+        text: 'An aggregate with 150,000 events takes 4.8 seconds to rehydrate its state in memory on every read. What is the fundamental pattern to achieve sub-10ms reads without compromising the immutable event log?',
+        options: [
+          { text: 'A) Delete older events from the log table using a CRON job.', correct: false },
+          { text: 'B) Periodic Snapshotting: store the aggregate state at event N, and only replay events occurring after N upon rehydration.', correct: true },
+          { text: 'C) Replace the event log with a traditional CRUD table.', correct: false },
+          { text: 'D) Cache all events in browser local storage.', correct: false }
+        ]
+      }
+    ];
+
+    // Auth Handlers
+    function switchAuthTab(mode) {
+      const loginTab = document.getElementById('tabLogin');
+      const signupTab = document.getElementById('tabSignup');
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+
+      if (mode === 'login') {
+        loginTab.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600";
+        signupTab.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]";
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+      } else {
+        signupTab.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600";
+        loginTab.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]";
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+
+    function handleSignup(e) {
+      e.preventDefault();
+      const user = {
+        name: document.getElementById('signupName').value.trim(),
+        username: document.getElementById('signupUsername').value.trim(),
+        pin: document.getElementById('signupPin').value.trim(),
+        role: document.getElementById('signupRole').value
+      };
+      localStorage.setItem('mentor_user_' + user.username, JSON.stringify(user));
+      loginUser(user);
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const pin = document.getElementById('loginPin').value.trim();
+
+      const stored = localStorage.getItem('mentor_user_' + username);
+      if (stored) {
+        const user = JSON.parse(stored);
+        if (user.pin === pin) {
+          loginUser(user);
+          return;
+        }
+      }
+      // Fallback: create on the fly if test
+      loginUser({
+        name: username,
+        username: username,
+        pin: pin,
+        role: 'Senior Full-Stack Architect'
+      });
+    }
+
+    function loadDemoAccount() {
+      loginUser({
+        name: 'Alex Vance',
+        username: 'alex_v',
+        pin: '1234',
+        role: 'Senior Full-Stack Architect'
+      });
+    }
+
+    function loginUser(user) {
+      state.user = user;
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('appDashboard').classList.remove('hidden');
+      
+      document.getElementById('traineeNameDisplay').textContent = user.name;
+      document.getElementById('roleBadgeDisplay').textContent = user.role;
+      document.getElementById('intakeGoalInput').value = user.role;
+
+      // Update Nav User Bar
+      const navBar = document.getElementById('navUserBar');
+      navBar.innerHTML = `
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-indigo-600/20 text-indigo-400 font-bold flex items-center justify-center text-xs border border-indigo-500/30">
+            ${user.name.charAt(0).toUpperCase()}
+          </div>
+          <div class="hidden sm:block text-left text-xs">
+            <div class="font-bold leading-tight">${user.name}</div>
+            <div class="text-[10px] text-[var(--muted-foreground)]">@${user.username}</div>
+          </div>
+          <button onclick="handleLogout()" class="ml-2 text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--content)] text-[var(--muted-foreground)] transition">
+            Sign Out
+          </button>
+        </div>
+      `;
+
+      initDiagnosticQuestions();
+      initGatekeeperExam();
+    }
+
+    function handleLogout() {
+      state.user = null;
+      document.getElementById('authSection').classList.remove('hidden');
+      document.getElementById('appDashboard').classList.add('hidden');
+      document.getElementById('navUserBar').innerHTML = '';
+    }
+
+    // Tab Navigation
+    function switchModule(moduleName) {
+      state.activeModule = moduleName;
+      document.querySelectorAll('.module-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.add('text-[var(--muted-foreground)]');
+      });
+
+      document.getElementById('module-' + moduleName).classList.remove('hidden');
+      const activeBtn = document.getElementById('tab-' + moduleName);
+      if (activeBtn) {
+        activeBtn.classList.add('tab-active');
+        activeBtn.classList.remove('text-[var(--muted-foreground)]');
+      }
+    }
+
+    // Diagnostic System
+    function initDiagnosticQuestions() {
+      const container = document.getElementById('questionsList');
+      container.innerHTML = diagnosticBank.map((q, idx) => `
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-400">Question ${idx + 1} of 5</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-[var(--content)] border border-[var(--border)] text-[var(--muted-foreground)]">System Design & Edge Cases</span>
+          </div>
+          <h4 class="text-sm font-semibold text-[var(--foreground)]">${q.title}</h4>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">${q.text}</p>
+          <div class="space-y-2 pt-1 text-xs">
+            ${q.options.map((opt, optIdx) => `
+              <label class="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] hover:bg-[var(--content)] cursor-pointer transition">
+                <input type="radio" name="diag_${q.id}" value="${optIdx}" onchange="recordDiagAnswer('${q.id}', ${optIdx})" class="mt-0.5 text-indigo-600">
+                <span class="text-[var(--foreground)]">${opt.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function startDiagnosticTest() {
+      document.getElementById('diagnosticQuestionsContainer').classList.remove('hidden');
+      document.getElementById('btnStartDiagnostic').textContent = "Diagnostic Active Below";
+      document.getElementById('btnStartDiagnostic').classList.add('opacity-50');
+      document.getElementById('diagnosticQuestionsContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function recordDiagAnswer(qid, optIdx) {
+      state.diagnosticAnswers[qid] = optIdx;
+    }
+
+    function submitDiagnosticTest() {
+      let correctCount = 0;
+      diagnosticBank.forEach(q => {
+        const selected = state.diagnosticAnswers[q.id];
+        if (selected !== undefined && q.options[selected].correct) {
+          correctCount++;
+        }
+      });
+
+      const scorePercent = Math.round((correctCount / diagnosticBank.length) * 100);
+      state.diagnosticScore = scorePercent;
+
+      // Update UI
+      document.getElementById('diagnosticScore').textContent = `${scorePercent}%`;
+      document.getElementById('diagnosticScore').className = scorePercent >= 80 ? 'text-3xl font-extrabold text-emerald-400' : 'text-3xl font-extrabold text-amber-400';
+      document.getElementById('diagnosticStatusDot').className = 'w-2 h-2 rounded-full bg-emerald-500';
+      document.getElementById('evaluatedBaselineDisplay').textContent = `Baseline: ${scorePercent}% Verified (${scorePercent >= 80 ? 'Advanced' : 'Solid Intermediate'})`;
+
+      document.getElementById('diagnosticResultsBox').classList.remove('hidden');
+      document.getElementById('diagnosticResultsBox').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Daily Verification
+    function verifyDailyCheckpoint() {
+      const selected = document.querySelector('input[name="dailyCheck"]:checked');
+      const feedback = document.getElementById('dailyVerificationFeedback');
+
+      if (!selected) {
+        feedback.innerHTML = '<span class="text-amber-400">Please select an answer first.</span>';
+        return;
+      }
+
+      if (selected.value === 'opt1') {
+        feedback.innerHTML = '<span class="text-emerald-400 font-bold">✓ Correct! Lost Update prevented. Daily streak confirmed.</span>';
+      } else {
+        feedback.innerHTML = '<span class="text-rose-400 font-bold">✗ Incorrect. Review the difference between Lost Updates and Table Locking.</span>';
+      }
+    }
+
+    // Gatekeeper Exam System
+    function initGatekeeperExam() {
+      const container = document.getElementById('examQuestionsList');
+      container.innerHTML = gatekeeperBank.map((q, idx) => `
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-red-400">Gatekeeper Challenge ${idx + 1} of 5</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-300 border border-red-500/20">Progression Gate</span>
+          </div>
+          <h4 class="text-sm font-semibold text-[var(--foreground)]">${q.title}</h4>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">${q.text}</p>
+          <div class="space-y-2 pt-1 text-xs">
+            ${q.options.map((opt, optIdx) => `
+              <label class="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] hover:bg-[var(--content)] cursor-pointer transition">
+                <input type="radio" name="gk_${q.id}" value="${optIdx}" onchange="recordExamAnswer('${q.id}', ${optIdx})" class="mt-0.5 text-indigo-600">
+                <span class="text-[var(--foreground)]">${opt.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function recordExamAnswer(qid, optIdx) {
+      state.examAnswers[qid] = optIdx;
+    }
+
+    function submitGatekeeperExam() {
+      let correct = 0;
+      let wrongTopics = [];
+
+      gatekeeperBank.forEach((q, idx) => {
+        const chosen = state.examAnswers[q.id];
+        if (chosen !== undefined && q.options[chosen].correct) {
+          correct++;
+        } else {
+          wrongTopics.push(q.title);
+        }
+      });
+
+      const percentage = Math.round((correct / gatekeeperBank.length) * 100);
+      const passed = percentage >= 80;
+      state.gatekeeperScore = percentage;
+      state.phase2Unlocked = passed;
+
+      const resultPanel = document.getElementById('examResultPanel');
+      resultPanel.classList.remove('hidden');
+
+      if (passed) {
+        // Pass Progression Rule
+        resultPanel.className = "p-5 rounded-2xl border border-emerald-500/30 bg-emerald-950/20 space-y-3";
+        resultPanel.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold flex items-center justify-center">✓</span>
+              <div>
+                <h4 class="font-bold text-emerald-400 text-base">Gatekeeper Passed (${percentage}% - ${correct}/5 Correct)</h4>
+                <p class="text-xs text-[var(--muted-foreground)]">Progression Rule Satisfied: Threshold ≥ 80% achieved.</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300">Phase 2 Unlocked! 🎉</span>
+          </div>
+          <p class="text-xs text-[var(--foreground)] leading-relaxed">
+            Outstanding conceptual mastery. You have proven zero-tolerance reliability in handling idempotency edge-cases, composite index ordering, backpressure streaming, and cache stampede mitigation.
+          </p>
+          <div class="pt-2 flex justify-end">
+            <button onclick="switchModule('roadmap')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
+              View Unlocked Phase 2 Curriculum →
+            </button>
+          </div>
+        `;
+        document.getElementById('gateLockStatus').className = "px-1.5 py-0.2 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        document.getElementById('gateLockStatus').textContent = "PASSED";
+        document.getElementById('gatekeeperBadge').className = "px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold";
+        document.getElementById('gatekeeperBadge').textContent = "Phase 2 Unlocked";
+      } else {
+        // Fail Progression Rule - Strict Enforcement
+        resultPanel.className = "p-5 rounded-2xl border border-rose-500/30 bg-rose-950/20 space-y-3";
+        resultPanel.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-rose-600 text-white font-bold flex items-center justify-center">✕</span>
+              <div>
+                <h4 class="font-bold text-rose-400 text-base">Gatekeeper Progression Blocked (${percentage}% - ${correct}/5 Correct)</h4>
+                <p class="text-xs text-[var(--muted-foreground)]">Progression Rule Enforced: Score fell below the required 80% threshold.</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300">Phase 2 Remains Locked 🔒</span>
+          </div>
+          <div class="p-3 rounded-xl bg-black/40 border border-rose-500/20 text-xs space-y-1">
+            <div class="font-bold text-rose-300">Struggle Points Identified:</div>
+            ${wrongTopics.map(t => `<div class="text-[var(--muted-foreground)]">• ${t}</div>`).join('')}
+          </div>
+          <p class="text-xs text-[var(--foreground)] leading-relaxed">
+            <strong>Mentor Remedial Directive:</strong> You are not permitted to move to distributed streams and multi-region replication until single-node concurrency and streaming backpressure are instinctive. Review the targeted drills assigned in your daily checkpoint, then retest.
+          </p>
+          <div class="pt-2 flex justify-end">
+            <button onclick="resetGatekeeperExam()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-sm transition">
+              Clear & Retest Fresh Exam
+            </button>
+          </div>
+        `;
+      }
+
+      resultPanel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetGatekeeperExam() {
+      state.examAnswers = {};
+      initGatekeeperExam();
+      document.getElementById('examResultPanel').classList.add('hidden');
+    }
+
+    // Auto-boot demo if opened directly
+    window.addEventListener('DOMContentLoaded', () => {
+      // Ready state
+    });
+  </script>
+</body>
+</html>
